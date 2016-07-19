@@ -1,0 +1,10 @@
+^^
+$.require("express");
+$.require("http");
+$$
+var app = express();
+var server = http.createServer(app);
+server.listen(^^=port$$, function(err){
+	if(err) console.log("failed");
+	else console.log("success");
+});

@@ -1,0 +1,5 @@
+$.default("lang", "expressjs");
+$.default("port", 80);
+$.asmain()
+
+
