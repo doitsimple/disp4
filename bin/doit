@@ -1,0 +1,56 @@
+#!/usr/bin/env node
+var path = require("path");
+var libString = require("../lib/js/string");
+var Disp = require("../src/index");
+var log = require("../lib/nodejs/log");
+log.setLevel(2);
+function parseArgv(){
+	//init global
+	var ParamsHelp = {
+		"p": "project path, default '.'",
+		"e": "set env",
+		"t": "target path, default '.', can be configured in disp.json",
+		"x": "extra disp.json file to extend",
+		"P": "production",
+		"v": "verbose mode"
+	}
+	var env = {};
+	env.argv = [];
+	env._nodeBin = process.argv.shift();
+	env._dispBin = process.argv.shift();
+	env._isRoot = 1;
+	var op = process.argv.shift();
+	while(op){
+		switch(op){
+			case "-e":
+			var evalString = process.argv.shift();
+			eval(evalString);
+			break;
+			case "-p":
+			env.projectDir = process.argv.shift();
+			break;
+			case "-t":
+			env.targetDir = process.argv.shift();
+			break;
+			case "-x":
+			env.dispJsonExFile = process.argv.shift();
+			break;
+			case "-v":
+			log.setLevel(3);
+			log.v("verbose mode enabled");
+			break;
+			case "-h":
+			case "--help":
+			throw libString.makeArgvHelp(ParamsHelp);
+			break;
+			default:
+			env.argv.push(op);
+		}
+		op = process.argv.shift();
+	}
+	log.v(env);
+	return env;
+}
+
+var disp = new Disp(parseArgv());
+disp.run();
