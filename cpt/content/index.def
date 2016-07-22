@@ -1,0 +1,3 @@
+$.default("success", {});
+$.default("error", {});
+$.default("param", "");

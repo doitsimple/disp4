@@ -43,10 +43,9 @@ Disp.prototype.run = function(){
 	self.src = libFile.readJson("disp.json");
 	
 	for(var i in self.src){
-		self.addCpt(self.src[i]);
+		self.addcpt(self.src[i]);
 	}
 	self.impl();
-	console.log(self);
 	self.gen();
 //	self.readSrc();
 //	self.analyzeSrc();
@@ -54,20 +53,27 @@ Disp.prototype.run = function(){
 //	self.genFilelist();
 	self.dispose();
 }
-Disp.prototype.addCpt = function(json){
+Disp.prototype.addcpt = function(json){
 	var self = this;
 	var env = self.global.env;
 	var cpt = Object.keys(json)[0];
-	var indexFile = env.dispDir + "/cpt/"+cpt+"/index";
+	var indexFile = env.dispDir + "/cpt/" + cpt + "/index.def";
 	if(!json.name){
-		if(!self.keyCounts[cpt]) 
+		if(!self.keyCounts[cpt])
 			self.keyCounts[cpt] = 1;
 		else
 			self.keyCounts[cpt] ++;
-		json.name = cpt + self.keyCounts[cpt];			
+		json.name = cpt + self.keyCounts[cpt];
 	}
 	json.cpt = cpt;
+	
 	self.global.ns[json.name] = json;
+	if(!self.global.ns[cpt])
+		self.global.ns[cpt] = {
+			instances: {}
+		};
+	self.global.ns[cpt].instances[json.name] = json;
+//concept
 	if(fs.existsSync(indexFile)){
 		tmpl.render({
 			file: indexFile,
@@ -80,15 +86,30 @@ Disp.prototype.addCpt = function(json){
 						json[key] = val;
 					}
 				},
-				dep: function(d){
+				childof: function(d){
 					if(!self.deps[cpt])
 						self.deps[cpt] = {};
 					self.deps[cpt][d]=1;
+					var jsonnew = {};
+					jsonnew[d] = libObject.copy(json[cpt], jsonnew);
+					self.addcpt(jsonnew);
 				},
-				link: function(tname){
-					var mp = self.global[tname];					
-					if(mp.hasOwnProperty(cpt)) mp[cpt] = json;
-					json[mp.cpt] = tname;
+				relto: function(tname){
+					var mp = self.global.ns[tname];
+					if(mp.instances){
+// is class
+						if(json[tname]) return;
+						var tname2 = Object.keys(mp.instances)[0];
+						var mp2 = self.global.ns[tname2];
+						if(!mp2.content) mp2.content= {};
+						mp2.content[json.name] = json;
+						json[mp2.cpt] = tname2;
+					}else{
+// is instance
+						if(!mp.content) mp.content= {};
+						mp.content[json.name] = json;
+						json[mp.cpt] = tname;
+					}
 				},
 				addfs: function(json){
 					libObject.extend(self.filelist, json);
@@ -109,7 +130,7 @@ Disp.prototype.impl = function(){
 	for(var key in self.global.main){
 		var localenv = {};
 		localenv[key] = self.global.main[key];
-		self.addCpt(localenv);		
+		self.addcpt(localenv);		
 	}
 }
 Disp.prototype.getstr = function(localenv){
@@ -122,17 +143,23 @@ Disp.prototype.getstr = function(localenv){
 	}
 	var prestr = "";
 	var poststr = "";
+//implmentation
 	var str = tmpl.render({
 		file: cfile,
+		argv: localenv[localenv.cpt],
 		extend: {
+			eval: function(json, lang){
+				json.lang = lang || localenv.lang;
+				self.addcpt(json);
+				return self.getstr(json);
+			},
 			require: function(d){
 				prestr += self.getstr({
 					require: d,
-					argv: d,
 					cpt: "require", 
 					lang: localenv.lang
 				});
-			}
+			}			
 		},
 		global: self.global
 	}, localenv);
@@ -142,6 +169,13 @@ Disp.prototype.gen = function(){
 	var self = this;
 	var env = self.global.env;
 	if(!env.targetDir) env.targetDir = ".";
+//one time
+	for(var key in self.filelist){
+		var config = self.filelist[key];
+		var localenv = config.env;
+		self.getstr(localenv);
+	}
+//two times
 	for(var key in self.filelist){
 		var tfilename = env.targetDir + "/" + key;
 		var config = self.filelist[key];
@@ -164,7 +198,7 @@ Disp.prototype.gen = function(){
 Disp.prototype.getfile = function(cpt, lang){
 	var self = this;
 	var env = self.global.env;
-	var f = env.dispDir + "/cpt/"+cpt+"/"+lang;
+	var f = env.dispDir + "/cpt/"+cpt+"/"+lang + ".imp";
 	if(fs.existsSync(f)){
 		return f;
 	}
@@ -614,6 +648,7 @@ Disp.prototype.getDepConfig = function(key, lang, val){
 */
 Disp.prototype.dispose = function(){
 	var self = this;
+//	console.log(self);
 /*
 	if(self.global._isRoot)
 		fs.writeFileSync(

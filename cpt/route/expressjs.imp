@@ -1,0 +1,3 @@
+^^=param$$.route("^^=url$$").^^=method$$(function(req, res){
+^^=~content: content$$
+})

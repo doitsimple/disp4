@@ -3,6 +3,7 @@ $.require("express");
 $.require("http");
 $$
 var app = express();
+^^=~content: content, param: "app"$$
 var server = http.createServer(app);
 server.listen(^^=port$$, function(err){
 	if(err) console.log("failed");

@@ -1,4 +1,4 @@
-$.dep("nodejs");
+$.childof("js");
 var ft = {};
 for(var key in argv){
 	ft[key+".js"] = {

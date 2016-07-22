@@ -1,0 +1,3 @@
+$.default("method", "get");
+$.default("url", "/");
+$.relto("server");

@@ -1,0 +1,16 @@
+^^
+var content = "";
+var funcs = Object.keys(argv);
+for(var ii = funcs.length-1;ii>=0;ii--){
+ var toeval = argv[funcs[ii]];
+ toeval.param = param;
+ if(!toeval) throw $.stringify(argv);
+ toeval.error = $.concat(toeval.error, error);
+ toeval.success = $.concat(toeval.success, content);
+ if(ii == funcs.length-1)
+   toeval.success = $.concat(toeval.success, success);
+
+ content = $.eval(toeval);
+}
+$$
+^^=content$$;
