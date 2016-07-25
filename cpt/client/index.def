@@ -1,0 +1,3 @@
+$.default("lang", "html");
+$.default("content", {});
+$.asmain()

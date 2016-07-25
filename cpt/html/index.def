@@ -1,0 +1,10 @@
+$.childof("base")
+var ft = {};
+for(var key in argv){
+	for(var pkey in argv[key].page){
+		ft[key+"/"+pkey+".html"] = {
+			env: argv[key].page[pkey]
+		}
+	}
+}
+$.addfs(ft);

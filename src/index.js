@@ -94,22 +94,39 @@ Disp.prototype.addcpt = function(json){
 					jsonnew[d] = libObject.copy(json[cpt], jsonnew);
 					self.addcpt(jsonnew);
 				},
+				partof: function(tname){
+					var mp = self.global.ns[tname];
+					if(mp.instances){
+// is class
+						if(json[tname]) return;
+						tname = Object.keys(mp.instances)[0];
+						mp = self.global.ns[tname];
+					}
+// is instance
+					if(!mp.content) mp.content= {};
+					mp.content[json.name] = json;
+					if(!mp[cpt]) mp[cpt] = {};
+					mp[cpt][json.name] = json;
+					json[mp.cpt] = tname;
+					json.lang = mp.lang;
+				},
 				relto: function(tname){
 					var mp = self.global.ns[tname];
 					if(mp.instances){
 // is class
 						if(json[tname]) return;
-						var tname2 = Object.keys(mp.instances)[0];
-						var mp2 = self.global.ns[tname2];
-						if(!mp2.content) mp2.content= {};
-						mp2.content[json.name] = json;
-						json[mp2.cpt] = tname2;
-					}else{
-// is instance
-						if(!mp.content) mp.content= {};
-						mp.content[json.name] = json;
-						json[mp.cpt] = tname;
+						tname = Object.keys(mp.instances)[0];
+						mp = self.global.ns[tname];
 					}
+// is instance
+					if(!mp.content) mp.content= {};
+					mp.content[json.name] = json;
+					if(!mp[cpt]) mp[cpt] = {};
+					mp[cpt][json.nmae] = json;
+					json[mp.cpt] = tname;
+				},
+				addcpt: function(json){
+					self.addcpt(json);
 				},
 				addfs: function(json){
 					libObject.extend(self.filelist, json);

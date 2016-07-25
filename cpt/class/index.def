@@ -1,0 +1,5 @@
+for(var key in argv){
+	argv[key][cpt] = name;
+	argv[key].lang = lang;
+	$.addcpt(argv[key]);
+}

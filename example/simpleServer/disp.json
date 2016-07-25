@@ -10,5 +10,17 @@
 				"resp": "hello world"
 			}
 		]
+	},
+	{
+		"client": {}
+	},
+	{
+		"page": {},
+		"name": "index",
+		"content": [
+			{
+				"string": "abc"
+			}
+		]
 	}
 ]
